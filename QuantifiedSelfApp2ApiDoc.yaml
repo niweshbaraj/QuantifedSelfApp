@@ -1,0 +1,714 @@
+openapi: 3.0.0
+info:
+  title: Quantified Self App - MAD - I Final Project
+  description: >
+    <div>Quantified Self App is the title or theme for the final project of Modern Application Development - I January Term for Diploma Course of IITM Online BSc. Dedgree. Below is the gist of this project.
+    <h3>General Theme:</h3>
+    <ul> 
+      <li> Used for self tracking - tracking habits, activities, other life parameters etc.</li>
+      <li>User register and login system - Trackers will be shown to its user only. There will also be logout option for the user.</li>
+      <li>After login, user will go to dashboard which will list all trackers added by that user. It will also show last tracked and its value.</li>
+      <li>Dashboard will also have feature to add, update, delete and log tracker with ability to go to logging view for any tracker.</li>
+      <li>User can have multiple trackers where they can create, view, update and delete their trackers.</li>
+      <li>Each tracker will have the following:</li>
+      <ul>
+        <li>ID</li>
+        <li>Name</li>
+        <li>Description</li>
+        <li>Tracker type</li>
+        <li>settings</li>
+      </ul>
+      <li>User can log to one more tracker at any time, each time it’s logged it will capture:</li>
+      <ul>
+        <li>Time Stamp</li>
+        <li>Tracker</li>
+        <li>Value (based on the corresponding tracker type)</li>
+        <li>Note</li>
+      </ul>
+      <li>Terminology</li>
+      <ul>
+      <li>Tracker - Corresponding to the particular user</li>
+      <li>TrackerType - Type says what data is captured</li>
+        <ul>
+          <li>Numerical</li>
+          <li>Multiple Choice</li>
+          <li>Time Duration</li>
+          <li>Boolean</li>
+        </ul>
+      <li>Logging - Logging an event to a tracker by providing values</li>
+    <li>Trendline - Shows the list of logged events and may be graphs</li>
+    </ul>
+    </ul>
+    </div>
+
+    <h3> User Table Schema </h3> 
+    <table>
+      <thead>
+        <th>Column Name</th>
+        <th>Column Type</th>
+        <th>Constraints</th>
+      </thead>
+      <tbody>
+      <tr>
+        <td>id</td>
+        <td>Integer</td>
+        <td>Primary Key, Auto Increment</td>
+      </tr>
+      <tr>
+        <td>name</td>
+        <td>String</td>
+        <td>Not Null</td>
+      </tr>
+      <tr>
+        <td>usename</td>
+        <td>String</td>
+        <td>Unique, Not Null</td>
+      </tr>      
+      <tr>
+        <td>password</td>
+        <td>String</td>
+        <td>Not Null</td>
+      </tr>         
+    </tbody>
+    </table>
+
+    <h3> Tracker Table Schema </h3> 
+    <table>
+      <thead>
+        <th>Column Name</th>
+        <th>Column Type</th>
+        <th>Constraints</th>
+      </thead>
+      <tbody>
+      <tr>
+        <td>tracker_id</td>
+        <td>Integer</td>
+        <td>Primary Key, Auto Increment</td>
+      </tr>
+      <tr>
+        <td>tracker_namer</td>
+        <td>String</td>
+        <td>Unique, Not Null</td>
+      </tr>
+      <tr>
+        <td>tracker_description</td>
+        <td>String</td>
+        <td></td>
+      </tr>      
+      <tr>
+        <td>tracker_type</td>
+        <td>String</td>
+        <td>Not Null</td>
+      </tr>
+      <tr>
+        <td>tracker_settings</td>
+        <td>String</td>
+        <td></td>
+      </tr> 
+      <tr>
+        <td>user_id</td>
+        <td>Integer</td>
+        <td>Foreign Key (user.id), Not Null</td>
+      </tr>
+    </tbody>
+    </table>
+
+
+    <h3> TrackerLog Table Schema </h3> 
+    <table>
+      <thead>
+        <th>Column Name</th>
+        <th>Column Type</th>
+        <th>Constraints</th>
+      </thead>
+      <tbody>
+      <tr>
+        <td>log_id</td>
+        <td>Integer</td>
+        <td>Primary Key, Auto Increment</td>
+      </tr>
+      <tr>
+        <td>ltracker_id</td>
+        <td>Integer</td>
+        <td>Foreign Key (tracker.tracker_id), Not Null</td>
+      </tr>
+      <tr>
+        <td>when</td>
+        <td>String</td>
+        <td>Not Null</td>
+      </tr>
+      <tr>
+        <td>value</td>
+        <td>String</td>
+        <td>Not Null</td>
+      </tr>
+      <tr>
+        <td>notes</td>
+        <td>String</td>
+        <td></td>
+      </tr>
+    </tbody>
+    </table>
+
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:5500/
+  
+paths:
+  /api/registerUser:
+    post:
+      summary: Create/SignUp User
+      description: Add user to the database where first they have to fill their name, username(unique) and Password.
+      operationId: registerUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                username:
+                  type: string
+                password:
+                  type: string
+              xml:
+                name: User
+      responses:
+        '201':
+          description: Successfully Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    example: Random Kumar
+                  username:
+                    type: string
+                    example: randomkumar
+                  password:
+                    type: string
+                    example: randomKumarPasswordHashed
+        '404':
+          description: user already exists
+        '500':
+          description: Internal Server Error
+          
+  /api/login:
+    post:
+      summary: Logs user into the system
+      description: Logs user into system by letting them enter their username and password and then checking in the database if the user with that particular username exists and if their password match with that stored in the database.
+      operationId: loginUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+              xml:
+                name: User
+      responses:
+        '201':
+          description: Successfully Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                    example: randomkumar
+                  password:
+                    type: string
+                    example: randomKumarPasswordHashed
+        '404':
+          description: Either user don't exist or their login credentials are incorrect.
+        '500':
+          description: Internal Server Error
+          
+  /api/profile/{username}:
+    get:
+      summary: Shows profile/dashboard of user
+      description: Something
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+            example: randomkumar
+      responses:
+        '200':
+          description: Request Successful
+          content:
+            application/json:
+              schema:
+                title: course object
+                type: object
+                properties:
+                  course_id:
+                    type: integer
+                    example: 201
+                  course_name:
+                    type: string
+                    example: Maths1
+                  course_code:
+                    type: string
+                    example: MA101
+                  course_description:
+                    type: string
+                    example: Course Description Example
+        '500':
+          description: Internal Server Error
+        '404':
+          description: Course not found
+  
+  /api/user/{username}/tracker/{trackername}/details:
+    get:
+      summary: Shows specific tracker log detais and graphs/charts for a particular user.
+      description: Shows graphs and charts by selecting weekly, monthly or yearly basis of a particular tracker logs and also lists values and last tracked details of that tracker.
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+            example: randomkumar
+        - in: path
+          name: trackername
+          required: true
+          schema:
+            type: string
+            example: Running
+      responses:
+        '200':
+          description: Request Successful
+          content:
+            application/json:
+              schema:
+                title: course object
+                type: object
+                properties:
+                  course_id:
+                    type: integer
+                    example: 201
+                  course_name:
+                    type: string
+                    example: Maths1
+                  course_code:
+                    type: string
+                    example: MA101
+                  course_description:
+                    type: string
+                    example: Course Description Example
+        '500':
+          description: Internal Server Error
+        '404':
+          description: Tracker not found
+          
+  /api/user/{username}/tracker/{trackername}/data:
+    get:
+      summary: Single tracker data
+      description: Get information/data for the single tracker of a particular user.
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+            example: randomkumar
+        - in: path
+          name: trackername
+          required: true
+          schema:
+            type: string
+            example: Running
+      responses:
+        '200':
+          description: Request Successful
+          content:
+            application/json:
+              schema:
+                title: tracker object
+                type: object
+                properties:
+                  course_id:
+                    type: integer
+                    example: 201
+                  course_name:
+                    type: string
+                    example: Maths1
+                  course_code:
+                    type: string
+                    example: MA101
+                  course_description:
+                    type: string
+                    example: Course Description Example
+        '500':
+          description: Internal Server Error
+        '404':
+          description: Tracker not found
+          
+  /api/user/{username}/tracker/add_tracker:
+    post:
+      summary: Adds tracker for the user into the system
+      description: Adds tracker for the user by letting them define its name, type, settings and description.
+      operationId: addTracker
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+            example: randomkumar
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tracker_name:
+                  type: string
+                tracker_description:
+                  type: string
+                tracker_type:
+                  type: string
+                tracker_settings:
+                  type: string
+              xml:
+                name: Tracker
+      responses:
+        '201':
+          description: Successfully Added Tracker
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tracker_name:
+                    type: string
+                    example: Running
+                  tracker_description:
+                    type: string
+                    example: Tracker for running
+                  tracker_type:
+                    type: string
+                    example: Numerical
+                  tracker_settings:
+                    type: string
+                    example: None
+        '404':
+          description: Tracker name for the user already exists
+        '500':
+          description: Internal Server Error
+  
+  /api/user/{username}/tracker/{trackername}/update:
+    put:
+      summary: Updates tracker record for the user
+      description: Operation to update the tracker resource for a user
+      operationId: updateTracker
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+            example: randomkumar
+        - in: path
+          name: trackername
+          required: true
+          schema:
+            type: string
+            example: Running
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tracker_description:
+                  type: string
+                tracker_type:
+                  type: string
+                tracker_settings:
+                  type: string
+              xml:
+                name: Tracker
+      responses:
+        '200':
+          description: Successfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tracker_description:
+                    type: string
+                    example: Tracker for mood
+                  tracker_type:
+                    type: string
+                    example: Multiple Choice
+                  tracker_settings:
+                    type: string
+                    example: Happy, Angry, Sad
+        '404':
+          description: Tracker not found
+        '500':
+          description: Internal Server Error
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                  error_message:
+                    type: string
+  
+  /api/user/{username}/tracker/{trackername}/delete:  
+    delete:
+      summary: Delete the selected tracker record for the user
+      description: Operation to delete the selected tracker resource. It will also delete with whole log details of that tracker.
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+            example: randomkumar
+        - in: path
+          name: trackername
+          required: true
+          schema:
+            type: string
+            example: Running
+      responses:
+        '200':
+          description: Successfully Deleted
+        '500':
+          description: Internal Server Error
+        '404':
+          description: Tracker not found
+          
+  /api/user/{username}/tracker/{trackername}/log_tracker/{log_id}/data:
+    get:
+      summary: Particular tracker log data
+      description: Gets log details for the particular tracker of a particular user.
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+            example: randomkumar
+        - in: path
+          name: trackername
+          required: true
+          schema:
+            type: string
+            example: Running
+        - in: path
+          name: log_id
+          required: true
+          schema:
+            type: integer
+            example: Running
+      responses:
+        '200':
+          description: Request Successful
+          content:
+            application/json:
+              schema:
+                title: tracker object
+                type: object
+                properties:
+                  course_id:
+                    type: integer
+                    example: 201
+                  course_name:
+                    type: string
+                    example: Maths1
+                  course_code:
+                    type: string
+                    example: MA101
+                  course_description:
+                    type: string
+                    example: Course Description Example
+        '500':
+          description: Internal Server Error
+        '404':
+          description: Tracker not found
+          
+  /api/user/{username}/tracker/{trackername}/add_log:
+    post:
+      summary: Adds logs for the particular tracker for the user into the system
+      description: Adds tracker for the user by letting them define its name, type, settings and description.
+      operationId: addTrackerLog
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+            example: randomkumar
+        - in: path
+          name: trackername
+          required: true
+          schema:
+            type: string
+            example: Sleeping
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                when:
+                  type: string
+                val:
+                  type: string
+                notes:
+                  type: string
+              xml:
+                name: Tracker
+      responses:
+        '201':
+          description: Successfully Added Tracker
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  when:
+                    type: string
+                    example: 2022-03-08 17:38:27
+                  val:
+                    type: string
+                    example: No
+                  notes:
+                    type: string
+                    example: Project has taken my sleep
+        '404':
+          description: Tracker name for the user already exists
+        '500':
+          description: Internal Server Error
+  
+  /api/user/{username}/tracker/{trackername}/log_tracker/{log_id}/update:
+    put:
+      summary: Updates tracker log record for the user
+      description: Operation to update the single tracker log resource for a user. It can let user to update its when, value and notes.
+      operationId: updateTrackerLog
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+            example: randomkumar
+        - in: path
+          name: trackername
+          required: true
+          schema:
+            type: string
+            example: Running
+        - in: path
+          name: log_id
+          required: true
+          schema:
+            type: integer
+            example: Running
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                when:
+                  type: string
+                val:
+                  type: string
+                notes:
+                  type: string
+              xml:
+                name: TrackerLog
+      responses:
+        '200':
+          description: Successfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  when:
+                    type: string
+                    example: 2022-03-08 17:33:41
+                  val:
+                    type: string
+                    example: Happy
+                  notes:
+                    type: string
+                    example: Had a good time learning yaml
+        '404':
+          description: Tracker log not found
+        '500':
+          description: Internal Server Error
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                  error_message:
+                    type: string
+  
+  /api/user/{username}/tracker/{trackername}/log_tracker/{log_id}/delete:  
+    delete:
+      summary: Deletes the selected single log record of tracker of a user
+      description: Operation to delete the selected single log resource of the tracker of a user. It just delets one tracker log record from the system.
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+            example: randomkumar
+        - in: path
+          name: trackername
+          required: true
+          schema:
+            type: string
+            example: Running
+        - in: path
+          name: log_id
+          required: true
+          schema:
+            type: integer
+            example: Running
+      responses:
+        '200':
+          description: Successfully Deleted
+        '500':
+          description: Internal Server Error
+        '404':
+          description: Tracker not found
+                  
+components:
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    # optional, arbitrary value for documentation purposes
+# 2) Apply the security globally to all operations
+security:
+  - bearerAuth: []
